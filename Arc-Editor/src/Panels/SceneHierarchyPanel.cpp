@@ -118,18 +118,46 @@ namespace ArcEngine
 		}
 	}
 
+	static void SetLabel(const char* label)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		const ImVec2 lineStart = ImGui::GetCursorScreenPos();
+		const ImGuiStyle& style = ImGui::GetStyle();
+		float fullWidth = ImGui::GetContentRegionAvail().x;
+		float itemWidth = fullWidth * 0.6f;
+		ImVec2 textSize = ImGui::CalcTextSize(label);
+		ImRect textRect;
+		textRect.Min = ImGui::GetCursorScreenPos();
+		textRect.Max = textRect.Min;
+		textRect.Max.x += fullWidth - itemWidth;
+		textRect.Max.y += textSize.y;
+
+		ImGui::SetCursorScreenPos(textRect.Min);
+
+		ImGui::AlignTextToFramePadding();
+		textRect.Min.y += window->DC.CurrLineTextBaseOffset;
+		textRect.Max.y += window->DC.CurrLineTextBaseOffset;
+
+		ImGui::ItemSize(textRect);
+		if (ImGui::ItemAdd(textRect, window->GetID(label)))
+		{
+			ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), textRect.Min, textRect.Max, textRect.Max.x,
+				textRect.Max.x, label, nullptr, &textSize);
+
+			if (textRect.GetWidth() < textSize.x && ImGui::IsItemHovered())
+				ImGui::SetTooltip("%s", label);
+		}
+		ImVec2 v(0, textSize.y + window->DC.CurrLineTextBaseOffset);
+		ImGui::SetCursorScreenPos(ImVec2(textRect.Max.x - v.x, textRect.Max.y - v.y));
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(itemWidth);
+	}
+
 	static void DrawFloatControl(const std::string& label, float* value, float min = 0, float max = 0, float columnWidth = 100.0f)
 	{
 		ImGui::PushID(label.c_str());
-		
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, columnWidth);
-		ImGui::Text(label.c_str());
-		ImGui::NextColumn();
-
+		SetLabel(label.c_str());
 		ImGui::DragFloat("##value", value, 0.1f, min, max);
-
-		ImGui::Columns(1);
 		ImGui::PopID();
 	}
 
@@ -428,16 +456,15 @@ namespace ArcEngine
 		
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](SpriteRendererComponent& component)
 		{
-			ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+			SetLabel("Color");
+			ImGui::SameLine();
+			ImGui::ColorEdit4("##Color", glm::value_ptr(component.Color));
 
 			const uint32_t id = component.Texture == nullptr ? 0 : component.Texture->GetRendererID();
 
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
-			
-			ImGui::Text("Texture");
+			SetLabel("Texture");
 			const ImVec2 buttonSize = { 80, 80 };
-			ImGui::SameLine(ImGui::GetWindowWidth() * 0.6f);
-
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
@@ -469,7 +496,7 @@ namespace ArcEngine
 			{
 				const char* items[] = { "Static", "Kinematic", "Dynamic" };
 				const char* current_item = items[(int)component.Specification.Type];
-				ImGui::Text("Body Type");
+				SetLabel("Body Type");
 				ImGui::SameLine();
 				if (ImGui::BeginCombo("##BodyType", current_item))
 				{
@@ -500,7 +527,7 @@ namespace ArcEngine
 				{
 					const char* items[] = { "Discrete", "Continuous" };
 					const char* current_item = items[(int)component.Specification.CollisionDetection];
-					ImGui::Text("Collision Detection");
+					SetLabel("Collision Detection");
 					ImGui::SameLine();
 					if (ImGui::BeginCombo("##CollisionDetection", current_item))
 					{
@@ -523,7 +550,7 @@ namespace ArcEngine
 				{
 					const char* items[] = { "NeverSleep", "StartAwake", "StartAsleep" };
 					const char* current_item = items[(int)component.Specification.SleepingMode];
-					ImGui::Text("Sleeping Mode");
+					SetLabel("Sleeping Mode");
 					ImGui::SameLine();
 					if (ImGui::BeginCombo("##SleepingMode", current_item))
 					{
@@ -543,7 +570,7 @@ namespace ArcEngine
 					}
 				}
 
-				ImGui::Text("Freeze Rotation");
+				SetLabel("Freeze Rotation");
 				ImGui::SameLine();
 				ImGui::Checkbox("##FreezeRotationZ", &component.Specification.FreezeRotationZ);
 				ImGui::SameLine();
@@ -555,19 +582,23 @@ namespace ArcEngine
 
 		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](BoxCollider2DComponent& component)
 		{
-			ImGui::Text("Is Trigger");
+			SetLabel("Is Trigger");
 			ImGui::SameLine();
 			ImGui::Checkbox("##IsTrigger", &component.IsTrigger);
 
+			SetLabel("Size");
+			ImGui::SameLine();
 			glm::vec2 size = component.Size;
-			DrawVec2Control("Size", size, 1.0f, "%.4f");
+			ImGui::DragFloat2("##Size", glm::value_ptr(size), 0.1f, 0, 0, "%.4f");
 			if (size.x <= 0.1f)
 				size.x = 0.1f;
 			if (size.y <= 0.1f)
 				size.y = 0.1f;
 			component.Size = size;
 
-			DrawVec2Control("Offset", component.Offset, 0.0f, "%.4f");
+			SetLabel("Offset");
+			ImGui::SameLine();
+			ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.1f, 0, 0, "%.4f");
 
 			component.ValidateSpecification();
 		});
