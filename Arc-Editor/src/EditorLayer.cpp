@@ -332,7 +332,7 @@ namespace ArcEngine
 		
 		// Gizmos
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-		if(selectedEntity && m_GizmoType != -1 && !Input::IsKeyPressed(Key::LeftAlt))
+		if(selectedEntity && m_GizmoType != -1 && !Input::IsKeyPressed(Key::LeftAlt) && m_SceneState == SceneState::Edit)
 		{
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist();
