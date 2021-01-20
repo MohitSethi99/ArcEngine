@@ -11,6 +11,28 @@
 namespace YAML {
 
 	template<>
+	struct convert<glm::vec2>
+	{
+		static Node encode(const glm::vec2& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec2& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			return true;
+		}
+	};
+
+	template<>
 	struct convert<glm::vec3>
 	{
 		static Node encode(const glm::vec3& rhs)
@@ -64,6 +86,13 @@ namespace YAML {
 
 namespace ArcEngine
 {
+	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
+	{
+		out << YAML::Flow;
+		out << YAML::BeginSeq << v.x << v.y << YAML::EndSeq;
+		return out;
+	}
+
 	YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& v)
 	{
 		out << YAML::Flow;
@@ -148,6 +177,36 @@ namespace ArcEngine
 			out << YAML::Key << "TilingFactor" << YAML::Value << spriteRendererComponent.TilingFactor;
 
 			out << YAML::EndMap; // SpriteRendererComponent
+		}
+
+		if (entity.HasComponent<Rigidbody2DComponent>())
+		{
+			out << YAML::Key << "Rigidbody2DComponent";
+			out << YAML::BeginMap; // Rigidbody2DComponent
+
+			auto& rigidbody2DComponent = entity.GetComponent<Rigidbody2DComponent>();
+			out << YAML::Key << "Type" << YAML::Value << (int)rigidbody2DComponent.Specification.Type;
+			out << YAML::Key << "LinearDamping" << YAML::Value << rigidbody2DComponent.Specification.LinearDamping;
+			out << YAML::Key << "AngularDamping" << YAML::Value << rigidbody2DComponent.Specification.AngularDamping;
+			out << YAML::Key << "GravityScale" << YAML::Value << rigidbody2DComponent.Specification.GravityScale;
+			out << YAML::Key << "CollisionDetection" << YAML::Value << (int)rigidbody2DComponent.Specification.CollisionDetection;
+			out << YAML::Key << "SleepingMode" << YAML::Value << (int)rigidbody2DComponent.Specification.SleepingMode;
+			out << YAML::Key << "FreezeRotationZ" << YAML::Value << rigidbody2DComponent.Specification.FreezeRotationZ;
+
+			out << YAML::EndMap; // Rigidbody2DComponent
+		}
+
+		if (entity.HasComponent<BoxCollider2DComponent>())
+		{
+			out << YAML::Key << "BoxCollider2DComponent";
+			out << YAML::BeginMap; // BoxCollider2DComponent
+
+			auto& boxCollider2DComponent = entity.GetComponent<BoxCollider2DComponent>();
+			out << YAML::Key << "Size" << YAML::Value << boxCollider2DComponent.Size;
+			out << YAML::Key << "Offset" << YAML::Value << boxCollider2DComponent.Offset;
+			out << YAML::Key << "IsTrigger" << YAML::Value << boxCollider2DComponent.IsTrigger;
+
+			out << YAML::EndMap; // BoxCollider2DComponent
 		}
 
 		out << YAML::EndMap; // Entity
@@ -248,6 +307,28 @@ namespace ArcEngine
 					if(!textureFilepath.empty())
 						src.SetTexture(textureFilepath);
 					src.TilingFactor = spriteRendererComponent["TilingFactor"].as<float>();
+				}
+
+				auto rigidbody2DComponent = entity["Rigidbody2DComponent"];
+				if (rigidbody2DComponent)
+				{
+					auto& src = deserializedEntity.AddComponent<Rigidbody2DComponent>();
+					src.Specification.Type = (Rigidbody2dType)rigidbody2DComponent["Type"].as<int>();
+					src.Specification.LinearDamping = rigidbody2DComponent["LinearDamping"].as<float>();
+					src.Specification.AngularDamping = rigidbody2DComponent["AngularDamping"].as<float>();
+					src.Specification.GravityScale = rigidbody2DComponent["GravityScale"].as<float>();
+					src.Specification.CollisionDetection = (Rigidbody2D::CollisionDetectionType)rigidbody2DComponent["CollisionDetection"].as<int>();
+					src.Specification.SleepingMode = (Rigidbody2D::SleepType)rigidbody2DComponent["SleepingMode"].as<int>();
+					src.Specification.FreezeRotationZ = rigidbody2DComponent["FreezeRotationZ"].as<bool>();
+				}
+
+				auto boxCollider2DComponent = entity["BoxCollider2DComponent"];
+				if (boxCollider2DComponent)
+				{
+					auto& src = deserializedEntity.AddComponent<BoxCollider2DComponent>();
+					src.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
+					src.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
+					src.IsTrigger = boxCollider2DComponent["IsTrigger"].as<bool>();
 				}
 			}
 		}
