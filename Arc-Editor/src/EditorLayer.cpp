@@ -134,7 +134,7 @@ namespace ArcEngine
 		if(mouseX >= 0 && mouseY >= 0 && mouseX < viewportWidth && mouseY < viewportHeight)
 		{
 			int pixelData = m_ActiveScene->GetPixelDataAtPoint(mouseX, mouseY);
-			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+			m_HoveredEntity = pixelData == -1 || !m_ActiveScene->HasEntity(pixelData) ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 		
 		m_Framebuffer->Unbind();

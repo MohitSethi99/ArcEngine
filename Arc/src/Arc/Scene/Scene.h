@@ -20,6 +20,8 @@ namespace ArcEngine
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntityWithID(const uint32_t id);
 		void DestroyEntity(Entity entity);
+		bool HasEntity(Entity entityID);
+		bool HasEntity(uint32_t entityID);
 
 		void OnUpdateEditor(Timestep ts, EditorCamera& camera);
 		void OnRuntimeStart();

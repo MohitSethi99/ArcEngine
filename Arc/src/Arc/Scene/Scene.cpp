@@ -83,6 +83,16 @@ namespace ArcEngine
 		m_Registry.destroy(entity);
 	}
 
+	bool Scene::HasEntity(Entity entity)
+	{
+		return HasEntity((uint32_t)entity);
+	}
+
+	bool Scene::HasEntity(uint32_t entityID)
+	{
+		return m_EntityMap.find(entityID) != m_EntityMap.end();
+	}
+
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
 		Renderer2D::BeginScene(camera);
