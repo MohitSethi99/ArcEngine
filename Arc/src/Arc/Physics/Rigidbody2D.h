@@ -3,10 +3,10 @@
 #include "Arc/Core/Base.h"
 
 #include <box2d/b2_body.h>
-#include <box2d/b2_world.h>
-#include <box2d/b2_fixture.h>
 
 #include <glm/glm.hpp>
+
+#include "box2d/b2_fixture.h"
 
 namespace ArcEngine
 {
@@ -37,77 +37,42 @@ namespace ArcEngine
 		};
 
 	public:
-		Rigidbody2D(const glm::vec2& position, const float rotation, const Rigidbody2DSpecification& specification);
+		Rigidbody2D(const glm::vec2& position, float rotation, const Rigidbody2DSpecification& specification);
 		~Rigidbody2D() = default;
 
-		inline glm::vec2& const GetRuntimePosition() const { ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!"); return (glm::vec2&)m_Body2D->GetPosition(); }
-		inline float const GetRuntimeRotation() const { ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!"); return m_Body2D->GetAngle(); }
-		void SetRuntimeTransform(const glm::vec2& position, const float rotation);
+		inline Ref<Rigidbody2DSpecification> GetSpecification() const { return m_Specification; }
+		void SetSpecification(const Rigidbody2DSpecification& specification);
 
-		
-		inline Ref<Rigidbody2DSpecification> const GetSpecification() const { return m_Specification; }
-		void const SetSpecification(const Rigidbody2DSpecification& specification);
+	public:
+		inline glm::vec2& GetPosition() const { return (glm::vec2&)m_Body2D->GetPosition(); }
+		inline float GetRotation() const { return m_Body2D->GetAngle(); }
+		inline float GetMass() const { return m_Body2D->GetMass();	}
+		inline glm::vec2& GetVelocity() const { return (glm::vec2&)m_Body2D->GetLinearVelocity(); }
+		inline float GetAngularVelocity() const { return m_Body2D->GetAngularVelocity(); }
+		inline float GetInertia() const { return m_Body2D->GetInertia(); }
+		inline glm::vec2& GetLocalCenterOfMass() const { return (glm::vec2&)m_Body2D->GetLocalCenter(); }
+		inline glm::vec2& GetWorldCenterOfMass() const { return (glm::vec2&)m_Body2D->GetWorldCenter(); }
+		inline bool IsAwake() const { return m_Body2D->IsAwake(); }
 
-		// Set properties
-		inline void SetType(Rigidbody2dType type) { ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!"); m_Body2D->SetType((b2BodyType)type); }
-		inline void SetLinearDamping(float value) { ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!"); m_Body2D->SetLinearDamping(value); }
-		inline void SetAngularDamping(float value) { ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!"); m_Body2D->SetAngularDamping(value); }
-		inline void SetGravityScale(float value) { ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!"); m_Body2D->SetGravityScale(value); }
-		inline void SetCollisionDetection(CollisionDetectionType type)
-		{
-			ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!");
+		void SetTransform(const glm::vec2& position, const float rotation) const { m_Body2D->SetTransform((b2Vec2&)position, rotation); }
+		void SetType(const Rigidbody2dType type) const;
+		void SetMass(const float value) const;
+		inline void SetLinearDamping(const float value) const { m_Specification->LinearDamping = value; m_Body2D->SetLinearDamping(value); }
+		inline void SetAngularDamping(const float value) const { m_Specification->AngularDamping = value; m_Body2D->SetAngularDamping(value); }
+		inline void SetGravityScale(const float value) const { m_Specification->GravityScale = value; m_Body2D->SetGravityScale(value); }
+		void SetCollisionDetection(const CollisionDetectionType type) const { m_Specification->CollisionDetection = type; m_Body2D->SetBullet(type == CollisionDetectionType::Continuous ? true : false); }
+		void SetSleepingMode(const SleepType type) const;
+		inline void SetFreezeRotation(const bool flag) const { m_Specification->FreezeRotationZ = flag; m_Body2D->SetFixedRotation(flag); }
 
-			switch (type)
-			{
-				case CollisionDetectionType::Discrete:
-				{
-					m_Body2D->SetBullet(false);
-					break;
-				}
-				case CollisionDetectionType::Continuous:
-				{
-					m_Body2D->SetBullet(true);
-					break;
-				}
-			}
-		}
-		inline void SetSleepingMode(SleepType type)
-		{
-			ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!");
-
-			switch (type)
-			{
-				case SleepType::NeverSleep:
-				{
-					m_Body2D->SetSleepingAllowed(false);
-					m_Body2D->SetAwake(true);
-					break;
-				}
-				case SleepType::StartAsleep:
-				{
-					m_Body2D->SetSleepingAllowed(true);
-					m_Body2D->SetAwake(false);
-					break;
-				}
-				case SleepType::StartAwake:
-				{
-					m_Body2D->SetSleepingAllowed(true);
-					m_Body2D->SetAwake(true);
-					break;
-				}
-			}
-		}
-		inline void SetFreezeRotation(bool flag) { ARC_CORE_ASSERT(m_Body2D, "Body2D is not set!"); m_Body2D->SetFixedRotation(flag); }
+		inline void ResetMassData() const { m_Body2D->ResetMassData(); }
 
 	private:
-		b2Vec2 m_Position;
-		float m_Rotation;
-
-		Ref<Rigidbody2DSpecification> m_Specification;
+		Ref<Rigidbody2DSpecification> m_Specification{};
 
 		b2Body* m_Body2D;
 
 		friend class BoxCollider2D;
+		friend class CircleCollider2D;
 	};
 }
 

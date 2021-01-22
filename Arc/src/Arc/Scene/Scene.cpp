@@ -50,6 +50,7 @@ namespace ArcEngine
 		CopyComponent<SpriteRendererComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<Rigidbody2DComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<BoxCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<CircleCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<NativeScriptComponent>(target->m_Registry, m_Registry, enttMap);
 	}
 
@@ -120,6 +121,14 @@ namespace ArcEngine
 				boxCollider2d.StartSimulation(rigidbody2d.Body2D);
 			}
 		}
+		{
+			auto view = m_Registry.view<Rigidbody2DComponent, CircleCollider2DComponent>();
+			for (auto entity : view)
+			{
+				auto [rigidbody2d, circleCollider2d] = view.get<Rigidbody2DComponent, CircleCollider2DComponent>(entity);
+				circleCollider2d.StartSimulation(rigidbody2d.Body2D);
+			}
+		}
 	}
 
 	void Scene::OnRuntimeEnd()
@@ -172,7 +181,7 @@ namespace ArcEngine
 				{
 					auto [transform, rigidbody2d] = view.get<TransformComponent, Rigidbody2DComponent>(entity);
 
-					rigidbody2d.Body2D->SetRuntimeTransform(transform.Translation, transform.Rotation.z);
+					rigidbody2d.Body2D->SetTransform(transform.Translation, transform.Rotation.z);
 				}
 
 				Physics2D::OnUpdate();
@@ -181,10 +190,10 @@ namespace ArcEngine
 				{
 					auto [transform, rigidbody2d] = view.get<TransformComponent, Rigidbody2DComponent>(entity);
 
-					glm::vec2 position = rigidbody2d.Body2D->GetRuntimePosition();
+					glm::vec2 position = rigidbody2d.Body2D->GetPosition();
 					transform.Translation = glm::vec3(position.x, position.y, transform.Translation.z);
 
-					transform.Rotation = glm::vec3(transform.Rotation.x, transform.Rotation.y, rigidbody2d.Body2D->GetRuntimeRotation());
+					transform.Rotation = glm::vec3(transform.Rotation.x, transform.Rotation.y, rigidbody2d.Body2D->GetRotation());
 				}
 			}
 
@@ -282,6 +291,11 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
 	{
 	}
 }

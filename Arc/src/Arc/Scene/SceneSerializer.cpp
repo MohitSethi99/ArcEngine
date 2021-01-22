@@ -209,6 +209,19 @@ namespace ArcEngine
 			out << YAML::EndMap; // BoxCollider2DComponent
 		}
 
+		if (entity.HasComponent<CircleCollider2DComponent>())
+		{
+			out << YAML::Key << "CircleCollider2DComponent";
+			out << YAML::BeginMap; // CircleCollider2DComponent
+
+			auto& circleCollider2DComponent = entity.GetComponent<CircleCollider2DComponent>();
+			out << YAML::Key << "Radius" << YAML::Value << circleCollider2DComponent.Radius;
+			out << YAML::Key << "Offset" << YAML::Value << circleCollider2DComponent.Offset;
+			out << YAML::Key << "IsTrigger" << YAML::Value << circleCollider2DComponent.IsTrigger;
+
+			out << YAML::EndMap; // CircleCollider2DComponent
+		}
+
 		out << YAML::EndMap; // Entity
 	}
 
@@ -329,6 +342,15 @@ namespace ArcEngine
 					src.Size = boxCollider2DComponent["Size"].as<glm::vec2>();
 					src.Offset = boxCollider2DComponent["Offset"].as<glm::vec2>();
 					src.IsTrigger = boxCollider2DComponent["IsTrigger"].as<bool>();
+				}
+
+				auto circleCollider2DComponent = entity["CircleCollider2DComponent"];
+				if (circleCollider2DComponent)
+				{
+					auto& src = deserializedEntity.AddComponent<CircleCollider2DComponent>();
+					src.Radius = circleCollider2DComponent["Radius"].as<float>();
+					src.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
+					src.IsTrigger = circleCollider2DComponent["IsTrigger"].as<bool>();
 				}
 			}
 		}

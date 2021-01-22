@@ -153,11 +153,19 @@ namespace ArcEngine
 		ImGui::SetNextItemWidth(itemWidth);
 	}
 
-	static void DrawFloatControl(const std::string& label, float* value, float min = 0, float max = 0, float columnWidth = 100.0f)
+	static void DrawCheckbox(const std::string& label, bool* flag)
 	{
 		ImGui::PushID(label.c_str());
 		SetLabel(label.c_str());
-		ImGui::DragFloat("##value", value, 0.1f, min, max);
+		ImGui::Checkbox("##flag", flag);
+		ImGui::PopID();
+	}
+
+	static void DrawFloatControl(const std::string& label, float* value, float min = 0, float max = 0, const char* format = "%.3f")
+	{
+		ImGui::PushID(label.c_str());
+		SetLabel(label.c_str());
+		ImGui::DragFloat("##value", value, 0.1f, min, max, format);
 		ImGui::PopID();
 	}
 
@@ -378,6 +386,15 @@ namespace ArcEngine
 					ARC_CORE_WARN("This entity already has the Box Collider 2D Component!");
 				ImGui::CloseCurrentPopup();
 			}
+
+			if (ImGui::MenuItem("Circle Collider 2D"))
+			{
+				if (!entity.HasComponent<CircleCollider2DComponent>())
+					entity.AddComponent<CircleCollider2DComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Circle Collider 2D Component!");
+				ImGui::CloseCurrentPopup();
+			}
 			
 			ImGui::EndPopup();
 		}
@@ -399,7 +416,7 @@ namespace ArcEngine
 		{
 			auto& camera = component.Camera;
 
-			ImGui::Checkbox("Primary", &component.Primary);
+			DrawCheckbox("Primary", &component.Primary);
 
 			const char* projectionTypeStrings[] = { "Perspective", "Orthographic" };
 			const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
@@ -450,14 +467,13 @@ namespace ArcEngine
 				if(ImGui::DragFloat("Far Clip", &orthoFar, 0.1f))
 					camera.SetOrthographicFarClip(orthoFar);
 
-				ImGui::Checkbox("Fixed Aspect Ratio", &component.FixedAspectRatio);
+				DrawCheckbox("Fixed Aspect Ratio", &component.FixedAspectRatio);
 			}
 		});
 		
 		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](SpriteRendererComponent& component)
 		{
 			SetLabel("Color");
-			ImGui::SameLine();
 			ImGui::ColorEdit4("##Color", glm::value_ptr(component.Color));
 
 			const uint32_t id = component.Texture == nullptr ? 0 : component.Texture->GetRendererID();
@@ -487,17 +503,15 @@ namespace ArcEngine
 
 			ImGui::Spacing();
 			
-			DrawFloatControl("Tiling Factor", &component.TilingFactor, 0, 0, 200);
+			DrawFloatControl("Tiling Factor", &component.TilingFactor, 0, 0);
 		});
 
 		DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
 		{
-
 			{
 				const char* items[] = { "Static", "Kinematic", "Dynamic" };
 				const char* current_item = items[(int)component.Specification.Type];
 				SetLabel("Body Type");
-				ImGui::SameLine();
 				if (ImGui::BeginCombo("##BodyType", current_item))
 				{
 					for (int n = 0; n < 3; n++)
@@ -518,9 +532,9 @@ namespace ArcEngine
 
 			if (component.Specification.Type == Rigidbody2dType::Dynamic)
 			{
-				DrawFloatControl("Linear Damping", &(component.Specification.LinearDamping), 0.0f, 1000000.0f, 200);
-				DrawFloatControl("Angular Damping", &(component.Specification.AngularDamping), 0.0f, 1000000.0f, 200);
-				DrawFloatControl("Gravity Scale", &(component.Specification.GravityScale), -1000000.0f, 1000000.0f, 200);
+				DrawFloatControl("Linear Damping", &component.Specification.LinearDamping, 0.0f, 1000000.0f);
+				DrawFloatControl("Angular Damping", &component.Specification.AngularDamping, 0.0f, 1000000.0f);
+				DrawFloatControl("Gravity Scale", &component.Specification.GravityScale, -1000000.0f, 1000000.0f);
 			}
 			if (component.Specification.Type == Rigidbody2dType::Dynamic || component.Specification.Type == Rigidbody2dType::Kinematic)
 			{
@@ -528,7 +542,6 @@ namespace ArcEngine
 					const char* items[] = { "Discrete", "Continuous" };
 					const char* current_item = items[(int)component.Specification.CollisionDetection];
 					SetLabel("Collision Detection");
-					ImGui::SameLine();
 					if (ImGui::BeginCombo("##CollisionDetection", current_item))
 					{
 						for (int n = 0; n < 2; n++)
@@ -551,7 +564,6 @@ namespace ArcEngine
 					const char* items[] = { "NeverSleep", "StartAwake", "StartAsleep" };
 					const char* current_item = items[(int)component.Specification.SleepingMode];
 					SetLabel("Sleeping Mode");
-					ImGui::SameLine();
 					if (ImGui::BeginCombo("##SleepingMode", current_item))
 					{
 						for (int n = 0; n < 3; n++)
@@ -570,11 +582,37 @@ namespace ArcEngine
 					}
 				}
 
-				SetLabel("Freeze Rotation");
-				ImGui::SameLine();
-				ImGui::Checkbox("##FreezeRotationZ", &component.Specification.FreezeRotationZ);
+				DrawCheckbox("FreezeRotationZ", &component.Specification.FreezeRotationZ);
 				ImGui::SameLine();
 				ImGui::Text("Z");
+			}
+
+			// Debug
+			if (component.Body2D)
+			{
+				const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth;
+				if (ImGui::TreeNodeEx((void*)typeid(component.Body2D).hash_code(), treeNodeFlags, "Info"))
+				{
+					SetLabel("Mass");
+					ImGui::Text("%.4f", component.Body2D->GetMass());
+					SetLabel("Position");
+					ImGui::Text("%f, %f", component.Body2D->GetPosition().x, component.Body2D->GetPosition().y);
+					SetLabel("Rotation");
+					ImGui::Text("%f", component.Body2D->GetRotation());
+					SetLabel("Velocity");
+					ImGui::Text("%f, %f", component.Body2D->GetVelocity().x, component.Body2D->GetVelocity().y);
+					SetLabel("Angular Velocity");
+					ImGui::Text("%f", component.Body2D->GetAngularVelocity());
+					SetLabel("Intertia");
+					ImGui::Text("%f", component.Body2D->GetInertia());
+					SetLabel("Local Center of Mass");
+					ImGui::Text("%f, %f", component.Body2D->GetLocalCenterOfMass().x, component.Body2D->GetLocalCenterOfMass().y);
+					SetLabel("World Center of Mass");
+					ImGui::Text("%f, %f", component.Body2D->GetWorldCenterOfMass().x, component.Body2D->GetWorldCenterOfMass().y);
+					SetLabel("Sleep State");
+					ImGui::Text("%s", component.Body2D->IsAwake() ? "Awake" : "Asleep");
+					ImGui::TreePop();
+				}
 			}
 
 			component.ValidateSpecification();
@@ -582,12 +620,9 @@ namespace ArcEngine
 
 		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](BoxCollider2DComponent& component)
 		{
-			SetLabel("Is Trigger");
-			ImGui::SameLine();
-			ImGui::Checkbox("##IsTrigger", &component.IsTrigger);
+			DrawCheckbox("IsTrigger", &component.IsTrigger);
 
 			SetLabel("Size");
-			ImGui::SameLine();
 			glm::vec2 size = component.Size;
 			ImGui::DragFloat2("##Size", glm::value_ptr(size), 0.1f, 0, 0, "%.4f");
 			if (size.x <= 0.1f)
@@ -597,10 +632,34 @@ namespace ArcEngine
 			component.Size = size;
 
 			SetLabel("Offset");
-			ImGui::SameLine();
 			ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.1f, 0, 0, "%.4f");
 
+			// Debug
+			if (component.Collider2D)
+			{
+				const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth;
+				if (ImGui::TreeNodeEx((void*)typeid(component.Collider2D).hash_code(), treeNodeFlags, "Info"))
+				{
+					SetLabel("Density");
+					ImGui::Text("%.4f", component.Collider2D->GetDensity());
+					ImGui::TreePop();
+				}
+			}
+			
 			component.ValidateSpecification();
 		});
+
+		DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](CircleCollider2DComponent& component)
+			{
+				DrawCheckbox("IsTrigger", &component.IsTrigger);
+
+				SetLabel("Radius");
+				ImGui::DragFloat("##Radius", &component.Radius, 0.1f, 0.1, 0, "%.4f");
+
+				SetLabel("Offset");
+				ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.1f, 0, 0, "%.4f");
+
+				component.ValidateSpecification();
+			});
 	}
 }

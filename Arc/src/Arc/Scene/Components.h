@@ -10,6 +10,7 @@
 #include "Arc/Renderer/Texture.h"
 #include "Arc/Physics/Rigidbody2D.h"
 #include "Arc/Physics/BoxCollider2D.h"
+#include "Arc/Physics/CircleCollider2D.h"
 #include "Arc/Scene/SceneCamera.h"
 #include "Arc/Scene/ScriptableEntity.h"
 
@@ -113,8 +114,26 @@ namespace ArcEngine
 		
 		void ValidateSpecification()
 		{
-			if (Body2D)
-				Body2D->SetSpecification(Specification);
+			if(!Body2D)
+				return;
+
+			const auto spec = Body2D->GetSpecification();
+
+
+			if (spec->Type != Specification.Type)
+				Body2D->SetType(Specification.Type);
+			if (spec->LinearDamping != Specification.LinearDamping)
+				Body2D->SetLinearDamping(Specification.LinearDamping);
+			if (spec->AngularDamping != Specification.AngularDamping)
+				Body2D->SetAngularDamping(Specification.AngularDamping);
+			if (spec->GravityScale != Specification.GravityScale)
+				Body2D->SetGravityScale(Specification.GravityScale);
+			if (spec->CollisionDetection != Specification.CollisionDetection)
+				Body2D->SetCollisionDetection(Specification.CollisionDetection);
+			if (spec->SleepingMode != Specification.SleepingMode)
+				Body2D->SetSleepingMode(Specification.SleepingMode);
+			if (spec->FreezeRotationZ != Specification.FreezeRotationZ)
+				Body2D->SetFreezeRotation(Specification.FreezeRotationZ);
 		}
 	};
 
@@ -136,8 +155,37 @@ namespace ArcEngine
 
 		void ValidateSpecification()
 		{
-			if (Collider2D)
+			if (!Collider2D)
+				return;
+			
+			if (Size != Collider2D->GetSize() || Offset != Collider2D->GetOffset() || IsTrigger != Collider2D->IsTrigger())
 				Collider2D->SetSpecification(Size, Offset, IsTrigger);
+		}
+	};
+
+	struct CircleCollider2DComponent
+	{
+		float Radius = 0.5f;
+		glm::vec2 Offset{ 0.0f, 0.0f };
+		bool IsTrigger = false;
+
+		Ref<CircleCollider2D> Collider2D;
+
+		CircleCollider2DComponent() = default;
+		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
+
+		void StartSimulation(Ref<Rigidbody2D>& rigidbody2D)
+		{
+			Collider2D = CreateRef<CircleCollider2D>(rigidbody2D, Radius, Offset, IsTrigger);
+		}
+
+		void ValidateSpecification()
+		{
+			if (!Collider2D)
+				return;
+			
+			if(Radius != Collider2D->GetRadius() || Offset != Collider2D->GetOffset() || IsTrigger != Collider2D->IsTrigger())
+				Collider2D->SetSpecification(Radius, Offset, IsTrigger);
 		}
 	};
 }
