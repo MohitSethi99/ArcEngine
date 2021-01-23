@@ -34,7 +34,6 @@ namespace ArcEngine
 		OrthographicCameraController m_CameraController;
 
 		Ref<Framebuffer> m_Framebuffer;
-		Ref<Framebuffer> m_IDFrameBuffer;
 
 		Ref<Scene> m_ActiveScene;
 		Ref<Scene> m_EditorScene;
