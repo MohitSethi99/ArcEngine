@@ -139,6 +139,7 @@ namespace ArcEngine
 
 	struct BoxCollider2DComponent
 	{
+		glm::vec2 Scale{ 1.0f, 1.0f };
 		glm::vec2 Size{ 1.0f, 1.0f };
 		glm::vec2 Offset{ 0.0f, 0.0f };
 		bool IsTrigger = false;
@@ -150,7 +151,7 @@ namespace ArcEngine
 
 		void StartSimulation(Ref<Rigidbody2D>& rigidbody2D)
 		{
-			Collider2D = CreateRef<BoxCollider2D>(rigidbody2D, Size, Offset, IsTrigger);
+			Collider2D = CreateRef<BoxCollider2D>(rigidbody2D, Size * Scale, Offset, IsTrigger);
 		}
 
 		void ValidateSpecification()
@@ -158,7 +159,7 @@ namespace ArcEngine
 			if (!Collider2D)
 				return;
 			
-			if (Size != Collider2D->GetSize() || Offset != Collider2D->GetOffset() || IsTrigger != Collider2D->IsTrigger())
+			if (Size * Scale != Collider2D->GetSize() || Offset != Collider2D->GetOffset() || IsTrigger != Collider2D->IsTrigger())
 				Collider2D->SetSpecification(Size, Offset, IsTrigger);
 		}
 	};

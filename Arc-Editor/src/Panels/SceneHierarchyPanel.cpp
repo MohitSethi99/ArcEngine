@@ -624,7 +624,7 @@ namespace ArcEngine
 
 			SetLabel("Size");
 			glm::vec2 size = component.Size;
-			ImGui::DragFloat2("##Size", glm::value_ptr(size), 0.1f, 0, 0, "%.4f");
+			ImGui::DragFloat2("##Size", glm::value_ptr(size), 0.01f, 0, 0, "%.4f");
 			if (size.x <= 0.1f)
 				size.x = 0.1f;
 			if (size.y <= 0.1f)
@@ -632,7 +632,7 @@ namespace ArcEngine
 			component.Size = size;
 
 			SetLabel("Offset");
-			ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.1f, 0, 0, "%.4f");
+			ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.01f, 0, 0, "%.4f");
 
 			// Debug
 			if (component.Collider2D)
@@ -654,10 +654,10 @@ namespace ArcEngine
 				DrawCheckbox("IsTrigger", &component.IsTrigger);
 
 				SetLabel("Radius");
-				ImGui::DragFloat("##Radius", &component.Radius, 0.1f, 0.1, 0, "%.4f");
+				ImGui::DragFloat("##Radius", &component.Radius, 0.01f, 0.1, 0, "%.4f");
 
 				SetLabel("Offset");
-				ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.1f, 0, 0, "%.4f");
+				ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.01f, 0, 0, "%.4f");
 
 				component.ValidateSpecification();
 			});

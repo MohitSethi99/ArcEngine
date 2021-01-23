@@ -107,6 +107,19 @@ namespace ArcEngine
 			}
 		}
 
+		// Debug Draw
+		{
+			const glm::vec4 debugColor(0.5686f, 0.9568f, 0.5450981f, 0.25f);
+			auto view = m_Registry.view<TransformComponent, BoxCollider2DComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, boxCollider2D] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+
+				glm::mat4 trans = transform.GetTransform() * glm::translate(glm::mat4(1.0f), glm::vec3(boxCollider2D.Offset.x, boxCollider2D.Offset.y, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(boxCollider2D.Size.x, boxCollider2D.Size.y, 1.0f));
+				Renderer2D::DrawQuad((uint32_t)entity, trans, debugColor);
+			}
+		}
+
 		Renderer2D::EndScene();
 	}
 
@@ -122,6 +135,15 @@ namespace ArcEngine
 				rigidbody2d.StartSimulation(transform.Translation, transform.Rotation.z);
 			}
 		}
+		{
+			auto view = m_Registry.view<TransformComponent, BoxCollider2DComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, boxCollider2D] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+				boxCollider2D.Scale = transform.Scale;
+			}
+		}
+		
 
 		{
 			auto view = m_Registry.view<Rigidbody2DComponent, BoxCollider2DComponent>();

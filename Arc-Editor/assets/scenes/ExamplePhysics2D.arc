@@ -61,7 +61,7 @@ Entities:
       SleepingMode: 1
       FreezeRotationZ: false
     BoxCollider2DComponent:
-      Size: [8, 1]
+      Size: [1, 1]
       Offset: [0, 0]
       IsTrigger: false
   - Entity: 12837192831273
@@ -84,7 +84,7 @@ Entities:
       SleepingMode: 1
       FreezeRotationZ: false
     BoxCollider2DComponent:
-      Size: [0.100000001, 2.70000005]
+      Size: [1, 1]
       Offset: [0, 0]
       IsTrigger: false
   - Entity: 12837192831273

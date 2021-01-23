@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Arc/Core/Base.h"
-#include "Arc/Core/Timestep.h"
 
 #include <box2d/b2_world.h>
 
