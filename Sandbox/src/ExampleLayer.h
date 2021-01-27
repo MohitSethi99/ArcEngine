@@ -24,7 +24,7 @@ private:
 
 	ArcEngine::Ref<ArcEngine::Texture2D> m_Texture, m_ChernoLogoTexture;
 
-	ArcEngine::OrthographicCameraController m_CameraController;
+	ArcEngine::Camera m_Camera;
 	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };
 

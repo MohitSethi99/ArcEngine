@@ -169,13 +169,6 @@ namespace ArcEngine
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		glViewport(0, 0, m_Specification.Width, m_Specification.Height);
-
-		// int clearValue = -1;
-		// if(m_ColorAttachments.size() > 1)
-		// {
-		// 	for (size_t i = 1; i < m_ColorAttachments.size(); i++)
-		// 		glClearTexImage(m_ColorAttachments[i], 0, GL_RGBA, GL_UNSIGNED_BYTE, &clearValue);
-		// }
 	}
 
 	void OpenGLFramebuffer::Unbind()

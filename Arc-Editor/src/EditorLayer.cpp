@@ -16,7 +16,7 @@
 namespace ArcEngine
 {
 	EditorLayer::EditorLayer()
-		: Layer("Sandbox2D"), m_CameraController(1280.0f / 720.0f)
+		: Layer("Sandbox2D")
 	{
 	}
 
@@ -80,21 +80,16 @@ namespace ArcEngine
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
-		
-		// Update
-		if(m_ViewportFocused)
-			m_CameraController.OnUpdate(ts);
 
 		//Render
 		m_Framebuffer->Bind();
 		Renderer2D::ResetStats();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RenderCommand::Clear();
-
+		
 		// Update scene
 		switch (m_SceneState)
 		{
@@ -117,7 +112,7 @@ namespace ArcEngine
 				break;
 			}
 		}
-
+		
 		// Mouse Picking
 		auto [mx, my] = ImGui::GetMousePos();
 		mx -= m_ViewportBounds[0].x;
@@ -276,6 +271,7 @@ namespace ArcEngine
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
 		ImGui::Begin("Toolbar", nullptr);
+		ImGui::SetCursorPosX(ImGui::GetWindowWidth() / 2);
 		if (m_SceneState == SceneState::Edit)
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
@@ -306,6 +302,10 @@ namespace ArcEngine
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
+
+		if(m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
+			DrawRectAroundWindow({ 0.3f, 0.2f, 0.7f, 1.0f });
+		
 		auto viewportOffset = ImGui::GetCursorPos();
 		
 		m_ViewportFocused = ImGui::IsWindowFocused();
@@ -380,7 +380,6 @@ namespace ArcEngine
 
 	void EditorLayer::OnEvent(Event& e)
 	{
-		m_CameraController.OnEvent(e);
 		m_EditorCamera.OnEvent(e);
 		
 		EventDispatcher dispatcher(e);
@@ -475,6 +474,14 @@ namespace ArcEngine
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(filepath);
 		}
+	}
+
+	void EditorLayer::DrawRectAroundWindow(const glm::vec4& color)
+	{
+		ImVec2 windowMin = ImGui::GetWindowPos();
+		ImVec2 windowSize = ImGui::GetWindowSize();
+		ImVec2 windowMax = { windowMin.x + windowSize.x, windowMin.y + windowSize.y };
+		ImGui::GetForegroundDrawList()->AddRect(windowMin, windowMax, ImGui::ColorConvertFloat4ToU32(ImVec4(color.x, color.y, color.z, color.w)));
 	}
 
 }

@@ -15,8 +15,8 @@ public:
 	virtual void OnImGuiRender() override;
 	virtual void OnEvent(ArcEngine::Event& e) override;
 private:
-	ArcEngine::OrthographicCameraController m_CameraController;
 
+	ArcEngine::EditorCamera m_Camera;
 	// Temp
 	ArcEngine::Ref<ArcEngine::VertexArray> m_SquareVA;
 	ArcEngine::Ref<ArcEngine::Shader> m_FlatColorShader;

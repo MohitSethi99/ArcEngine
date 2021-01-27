@@ -19,7 +19,8 @@ project "Sandbox"
 		"%{wks.location}/Arc/src",
 		"%{wks.location}/Arc/vendor",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.Box2D}"
 	}
 
 	links

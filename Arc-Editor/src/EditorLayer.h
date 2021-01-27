@@ -30,9 +30,9 @@ namespace ArcEngine
 
 		void OnScenePlay();
 		void OnSceneStop();
-	private:
-		OrthographicCameraController m_CameraController;
 
+		void DrawRectAroundWindow(const glm::vec4& color);
+	private:
 		Ref<Framebuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;

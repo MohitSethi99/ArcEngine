@@ -493,7 +493,7 @@ namespace ArcEngine
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
-			if(ImGui::ImageButton((ImTextureID)id, buttonSize, { 1, 1 }, { 0, 0}, 0))
+			if(ImGui::ImageButton((ImTextureID)id, buttonSize, { 0, 1 }, { 1, 0}, 0))
 			{
 				std::string filepath = FileDialogs::OpenFile("Texture (*.png)\0*.png\0");
 				if (!filepath.empty())

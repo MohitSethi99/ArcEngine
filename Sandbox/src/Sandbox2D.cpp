@@ -4,7 +4,7 @@
 #include "imgui/imgui.h"
 
 Sandbox2D::Sandbox2D()
-	: Layer("Sandbox2D"), m_CameraController(1280.0f / 720.0f)
+	: Layer("Sandbox2D")
 {
 }
 
@@ -27,9 +27,6 @@ void Sandbox2D::OnUpdate(ArcEngine::Timestep ts)
 
 	frameTime = ts;
 	
-	// Update
-	m_CameraController.OnUpdate(ts);
-
 	//Render
 	ArcEngine::Renderer2D::ResetStats();
 	ArcEngine::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
@@ -38,7 +35,7 @@ void Sandbox2D::OnUpdate(ArcEngine::Timestep ts)
 	static float rotation = 0.0f;
 	rotation += ts * 50.0f;
 
-	ArcEngine::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	ArcEngine::Renderer2D::BeginScene(m_Camera);
 	ArcEngine::Renderer2D::DrawQuad(0, { -1.0f, 0.0f }, rotation, { 0.8f, 0.8f }, nullptr,	{ 0.8f, 0.2f, 0.3f, 1.0f });
 	ArcEngine::Renderer2D::DrawQuad(1, { 0.5f, -0.5f }, -rotation, { 0.5f, 0.75f }, nullptr, m_SquareColor);
 	ArcEngine::Renderer2D::DrawQuad(2, { 0.0f, 0.0f, -0.1f }, 0.0f, { 20.0f, 20.0f }, m_CheckerboardTexture, glm::vec4(1.0f), 10.0f);
@@ -86,5 +83,4 @@ void Sandbox2D::OnImGuiRender()
 
 void Sandbox2D::OnEvent(ArcEngine::Event& e)
 {
-	m_CameraController.OnEvent(e);
 }

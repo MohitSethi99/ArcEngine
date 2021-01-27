@@ -14,7 +14,6 @@
 #include "Arc/Core/Input.h"
 #include "Arc/Core/KeyCodes.h"
 #include "Arc/Core/MouseCodes.h"
-#include "Arc/Renderer/OrthographicCameraController.h"
 
 #include "Arc/ImGui/ImGuiLayer.h"
 
@@ -22,6 +21,7 @@
 #include "Arc/Scene/Entity.h"
 #include "Arc/Scene/ScriptableEntity.h"
 #include "Arc/Scene/Components.h"
+#include "Arc/Scene/SceneCamera.h"
 
 //-----Renderer-----------------------------------
 #include "Arc/Renderer/Renderer.h"
@@ -33,7 +33,4 @@
 #include "Arc/Renderer/Framebuffer.h"
 #include "Arc/Renderer/Texture.h"
 #include "Arc/Renderer/VertexArray.h"
-
-#include "Arc/Renderer/OrthographicCamera.h"
 //------------------------------------------------
-

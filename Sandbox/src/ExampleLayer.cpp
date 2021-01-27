@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 ExampleLayer::ExampleLayer() 
-	: Layer("ExampleLayer"), m_CameraController(1280.0f / 720.0f)
+	: Layer("ExampleLayer")
 {
 	m_VertexArray = ArcEngine::VertexArray::Create();
 
@@ -128,14 +128,11 @@ void ExampleLayer::OnDetach()
 
 void ExampleLayer::OnUpdate(ArcEngine::Timestep ts) 
 {
-	// Update
-	m_CameraController.OnUpdate(ts);
-
 	// Render
 	ArcEngine::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 	ArcEngine::RenderCommand::Clear();
 
-	ArcEngine::Renderer::BeginScene(m_CameraController.GetCamera());
+	ArcEngine::Renderer::BeginScene((ArcEngine::EditorCamera&)m_Camera);
 
 	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -174,5 +171,4 @@ void ExampleLayer::OnImGuiRender()
 
 void ExampleLayer::OnEvent(ArcEngine::Event& e) 
 {
-	m_CameraController.OnEvent(e);
 }

@@ -71,7 +71,11 @@ namespace ArcEngine
 			Texture = Texture2D::Create(filepath);
 			TextureFilepath = filepath;
 		}
-		void RemoveTexture() { Texture = nullptr; }
+		void RemoveTexture()
+		{
+			Texture = nullptr;
+			TextureFilepath = "";
+		}
 	};
 
 	struct CameraComponent
