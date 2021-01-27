@@ -183,6 +183,10 @@ namespace ArcEngine
 		}
 
 		style.WindowMinSize.x = minWinSizeX;
+
+		//==============================================================================================================
+		// Toolbar =====================================================================================================
+		//==============================================================================================================
 		
 		if (ImGui::BeginMenuBar())
 		{
@@ -209,63 +213,16 @@ namespace ArcEngine
 		}
 
 		m_SceneHierarchyPanel.OnImGuiRender();
-
-
-
-		ImGui::Begin("Settings");
-
-		ImGui::Text("2D Gravity");
-		ImGui::SameLine();
-		ImGui::DragFloat2("##Gravity2D", glm::value_ptr(Physics2D::Gravity), 0.1f);
-
-		ImGui::Text("2D Physics Timestep");
-		ImGui::SameLine();
-		ImGui::DragFloat("##2DPhysicsTimestep", &Physics2D::Timestep, 0.001f, 0.0001f, 0, "%.4f");
-
-		ImGui::Text("Velocity Iterations");
-		ImGui::SameLine();
-		ImGui::DragInt("##VelocityIterations", &Physics2D::VelocityIterations, 1, 0);
-
-		ImGui::Text("Position Iterations");
-		ImGui::SameLine();
-		ImGui::DragInt("##PositionIterations", &Physics2D::PositionIterations, 1, 0);
-		ImGui::End();
-
+		m_SettingsPanel.OnImGuiRender();
+		m_StatsPanel.OnImGuiRender();
 
 		
-		ImGui::Begin("Stats");
 
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Renderer2D Stats:");
-		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-
-		std::string name = "Null";
-		if(m_HoveredEntity)
-			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-		ImGui::Text("Hovered Entity: %s", name.c_str());
-
-		static float frameTimeRefreshTimer = 0.0f;
-		static float ft = 0.0f;
-		static float frameRate = 0.0f;
-		frameTimeRefreshTimer += frameTime;
-		if(frameTimeRefreshTimer >= 0.25f)
-		{
-			ft = frameTime;
-			frameRate = 1.0f / frameTime;
-			frameTimeRefreshTimer = 0.0f;
-		}
-		ImGui::Text("FrameTime: %.3f ms", ft);
-		ImGui::Text("FPS: %d", (int)frameRate);
-
-		ImGui::End();
-
-
-
-
-
+		
+		//==============================================================================================================
+		// Toolbar =====================================================================================================
+		//==============================================================================================================
+		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(12, 4));
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(12, 4));
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
@@ -296,9 +253,10 @@ namespace ArcEngine
 		ImGui::PopStyleColor(2);
 		ImGui::PopStyleVar(2);
 
-
-
-
+		
+		//==============================================================================================================
+		// Viewport ====================================================================================================
+		//==============================================================================================================
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
@@ -374,6 +332,10 @@ namespace ArcEngine
 
 		ImGui::End();
 		ImGui::PopStyleVar();
+		
+		//==============================================================================================================
+		//==============================================================================================================
+		//==============================================================================================================
 		
 		ImGui::End();
 	}

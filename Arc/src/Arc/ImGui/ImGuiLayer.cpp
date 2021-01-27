@@ -6,9 +6,9 @@
 #include <examples/imgui_impl_opengl3.h>
 
 #include "Arc/Core/Application.h"
+#include "Arc/ImGui/ImGuiStyles.h"
 
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
 
 #include <ImGuizmo.h>
 
@@ -49,7 +49,8 @@ namespace ArcEngine
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		SetDarkThemeColors();
+		ImGuiStyles::ApplyDefaultStyles();
+//		SetDarkThemeColors();
 		
 		Application& app = Application::Get();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());

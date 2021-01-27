@@ -3,6 +3,8 @@
 #include <ArcEngine.h>
 
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/SettingsPanel.h"
+#include "Panels/StatsPanel.h"
 
 #include "Arc/Renderer/EditorCamera.h"
 
@@ -60,5 +62,7 @@ namespace ArcEngine
 		
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+		SettingsPanel m_SettingsPanel;
+		StatsPanel m_StatsPanel;
 	};
 }
