@@ -222,6 +222,17 @@ namespace ArcEngine
 			out << YAML::EndMap; // CircleCollider2DComponent
 		}
 
+		if (entity.HasComponent<SkylightComponent>())
+		{
+			out << YAML::Key << "SkylightComponent";
+			out << YAML::BeginMap; // SkylightComponent
+
+			auto& skylightComponent = entity.GetComponent<SkylightComponent>();
+			out << YAML::Key << "TextureFilepath" << YAML::Value << skylightComponent.TextureFilepath;
+
+			out << YAML::EndMap; // SkylightComponent
+		}
+
 		out << YAML::EndMap; // Entity
 	}
 
@@ -351,6 +362,15 @@ namespace ArcEngine
 					src.Radius = circleCollider2DComponent["Radius"].as<float>();
 					src.Offset = circleCollider2DComponent["Offset"].as<glm::vec2>();
 					src.IsTrigger = circleCollider2DComponent["IsTrigger"].as<bool>();
+				}
+
+				auto skylightComponent = entity["SkylightComponent"];
+				if (skylightComponent)
+				{
+					auto& src = deserializedEntity.AddComponent<SkylightComponent>();
+					std::string textureFilepath = skylightComponent["TextureFilepath"].as<std::string>();
+					if(!textureFilepath.empty())
+						src.SetTexture(textureFilepath);
 				}
 			}
 		}

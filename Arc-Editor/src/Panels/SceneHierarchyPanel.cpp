@@ -395,6 +395,15 @@ namespace ArcEngine
 					ARC_CORE_WARN("This entity already has the Circle Collider 2D Component!");
 				ImGui::CloseCurrentPopup();
 			}
+
+			if (ImGui::MenuItem("Skylight"))
+			{
+				if (!entity.HasComponent<SkylightComponent>())
+					entity.AddComponent<SkylightComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Skylight Component!");
+				ImGui::CloseCurrentPopup();
+			}
 			
 			ImGui::EndPopup();
 		}
@@ -650,16 +659,44 @@ namespace ArcEngine
 		});
 
 		DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](CircleCollider2DComponent& component)
+		{
+			DrawCheckbox("IsTrigger", &component.IsTrigger);
+
+			SetLabel("Radius");
+			ImGui::DragFloat("##Radius", &component.Radius, 0.01f, 0.1, 0, "%.4f");
+
+			SetLabel("Offset");
+			ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.01f, 0, 0, "%.4f");
+
+			component.ValidateSpecification();
+		});
+
+		DrawComponent<SkylightComponent>("Skylight Component", entity, [](SkylightComponent& component)
+		{
+			const uint32_t id = component.Texture != nullptr ? component.Texture->GetHDRRendererID() : 0;
+			
+			SetLabel("Texture");
+			const ImVec2 buttonSize = { 80, 80 };
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.35f, 0.35f, 0.35f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.25f, 0.25f, 0.25f, 1.0f });
+			if (ImGui::ImageButton((ImTextureID)id, buttonSize, { 0, 1 }, { 1, 0 }, 0))
 			{
-				DrawCheckbox("IsTrigger", &component.IsTrigger);
+				std::string filepath = FileDialogs::OpenFile("Texture (*.hdr)\0*.hdr\0");
+				if (!filepath.empty())
+					component.SetTexture(filepath);
+			}
+			ImGui::PopStyleColor(3);
 
-				SetLabel("Radius");
-				ImGui::DragFloat("##Radius", &component.Radius, 0.01f, 0.1, 0, "%.4f");
-
-				SetLabel("Offset");
-				ImGui::DragFloat2("##Offset", glm::value_ptr(component.Offset), 0.01f, 0, 0, "%.4f");
-
-				component.ValidateSpecification();
-			});
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f });
+			if (ImGui::Button("x", { buttonSize.x / 4, buttonSize.y }))
+				component.RemoveTexture();
+			ImGui::PopStyleColor(3);
+			ImGui::PopStyleVar();
+		});
 	}
 }

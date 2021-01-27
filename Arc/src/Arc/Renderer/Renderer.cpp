@@ -2,9 +2,11 @@
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Renderer/Renderer2D.h"
 
+#include "Arc/Renderer/Shader.h"
+
 namespace ArcEngine
 {
-	Renderer::SceneData* Renderer::s_SceneData = new Renderer::SceneData;
+	Renderer::SceneData* Renderer::s_SceneData = new SceneData;
 
 	void Renderer::Init()
 	{
@@ -12,6 +14,74 @@ namespace ArcEngine
 		
 		RenderCommand::Init();
 		Renderer2D::Init();
+
+		// Cube Data =========================================================================
+		
+		float vertices[] = {
+	        -0.5f, -0.5f, -0.5f,
+	         0.5f, -0.5f, -0.5f,
+	         0.5f,  0.5f, -0.5f,
+	         0.5f,  0.5f, -0.5f,
+	        -0.5f,  0.5f, -0.5f,
+	        -0.5f, -0.5f, -0.5f,
+
+	        -0.5f, -0.5f,  0.5f,
+	         0.5f, -0.5f,  0.5f,
+	         0.5f,  0.5f,  0.5f,
+	         0.5f,  0.5f,  0.5f,
+	        -0.5f,  0.5f,  0.5f,
+	        -0.5f, -0.5f,  0.5f,
+
+	        -0.5f,  0.5f,  0.5f,
+	        -0.5f,  0.5f, -0.5f,
+	        -0.5f, -0.5f, -0.5f,
+	        -0.5f, -0.5f, -0.5f,
+	        -0.5f, -0.5f,  0.5f,
+	        -0.5f,  0.5f,  0.5f,
+
+	         0.5f,  0.5f,  0.5f,
+	         0.5f,  0.5f, -0.5f,
+	         0.5f, -0.5f, -0.5f,
+	         0.5f, -0.5f, -0.5f,
+	         0.5f, -0.5f,  0.5f,
+	         0.5f,  0.5f,  0.5f,
+
+	        -0.5f, -0.5f, -0.5f,
+	         0.5f, -0.5f, -0.5f,
+	         0.5f, -0.5f,  0.5f,
+	         0.5f, -0.5f,  0.5f,
+	        -0.5f, -0.5f,  0.5f,
+	        -0.5f, -0.5f, -0.5f,
+
+	        -0.5f,  0.5f, -0.5f,
+	         0.5f,  0.5f, -0.5f,
+	         0.5f,  0.5f,  0.5f,
+	         0.5f,  0.5f,  0.5f,
+	        -0.5f,  0.5f,  0.5f,
+	        -0.5f,  0.5f, -0.5f
+	    };
+
+	    s_SceneData->CubeVertexArray = VertexArray::Create();
+	    Ref<VertexBuffer> buffer = VertexBuffer::Create(vertices, sizeof(vertices));
+
+		const BufferLayout layout =
+	    {
+	        { ShaderDataType::Float3, "a_Position" }
+	    };
+		
+	    buffer->SetLayout(layout);
+
+	    s_SceneData->CubeVertexArray->AddVertexBuffer(buffer);
+		
+		// ===================================================================================
+		
+		s_SceneData->whiteTexture = Texture2D::Create(1, 1);
+		uint32_t whiteTextureData = 0xffffffff;
+		s_SceneData->whiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+
+		s_SceneData->SkyboxShader = Shader::Create("assets/shaders/Cubemap.glsl");
+		s_SceneData->SkyboxShader->Bind();
+		s_SceneData->SkyboxShader->SetInt("u_EnvironmentMap", 0);
 	}
 
 	void Renderer::Shutdown()
@@ -24,9 +94,9 @@ namespace ArcEngine
 		RenderCommand::SetViewport(0, 0, width, height);
 	}
 
-	void Renderer::BeginScene(OrthographicCamera& camera)
+	void Renderer::BeginScene(Camera& camera)
 	{
-		s_SceneData->ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+		s_SceneData->ViewProjectionMatrix = camera.GetViewProjection();
 	}
 
 	void Renderer::EndScene()
@@ -41,5 +111,39 @@ namespace ArcEngine
 		
 		vertexArray->Bind();
 		RenderCommand::DrawIndexed(vertexArray);
+	}
+
+	void Renderer::DrawCube(const Ref<Shader>& shader, const glm::mat4& transform)
+	{
+		shader->Bind();
+		shader->SetMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
+		shader->SetMat4("u_Transform", transform);
+		
+		s_SceneData->CubeVertexArray->Bind();
+		RenderCommand::DrawArray(0, 36);
+	}
+	
+	void Renderer::DrawSkybox(Ref<TextureCube>& textureCube, EditorCamera& camera)
+	{
+		RenderCommand::SetDepthMask(false);
+		s_SceneData->SkyboxShader->Bind();
+		s_SceneData->SkyboxShader->SetMat4("u_Projection", camera.GetProjection());
+		s_SceneData->SkyboxShader->SetMat4("u_View", camera.GetViewMatrix());
+		textureCube->Bind();
+		s_SceneData->CubeVertexArray->Bind();
+		RenderCommand::DrawArray(0, 36);
+		RenderCommand::SetDepthMask(true);
+	}
+
+	void Renderer::DrawSkybox(Ref<TextureCube>& textureCube, Camera& camera)
+	{
+		RenderCommand::SetDepthMask(false);
+		s_SceneData->SkyboxShader->Bind();
+		s_SceneData->SkyboxShader->SetMat4("u_Projection", camera.GetProjection());
+		s_SceneData->SkyboxShader->SetMat4("u_View", camera.GetView());
+		textureCube->Bind();
+		s_SceneData->CubeVertexArray->Bind();
+		RenderCommand::DrawArray(0, 36);
+		RenderCommand::SetDepthMask(true);
 	}
 }

@@ -27,12 +27,12 @@ Entities:
     TagComponent:
       Tag: Camera
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [0, 0, 15]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
-        ProjectionType: 1
+        ProjectionType: 0
         PerspectiveFOV: 0.785398185
         PerspectiveNear: 0.00999999978
         PerspectiveFar: 1000
@@ -156,3 +156,12 @@ Entities:
       Radius: 0.5
       Offset: [0, 0]
       IsTrigger: false
+  - Entity: 12837192831273
+    TagComponent:
+      Tag: Skylight
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SkylightComponent:
+      TextureFilepath: G:\CPP\ArcEngine\Arc-Editor\assets\textures\Cubemap.hdr

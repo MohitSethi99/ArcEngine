@@ -30,6 +30,21 @@ namespace ArcEngine
 		{
 			s_RendererAPI->DrawIndexed(vertexArray, indexCount);
 		}
+
+		inline static void DrawArray(uint32_t first, uint32_t count)
+		{
+			s_RendererAPI->DrawArray(first, count);
+		}
+		
+		inline static void SetDepthMask(bool flag)
+		{
+			s_RendererAPI->SetDepthMask(flag);
+		}
+
+		inline static void SetDepthTest(bool flag)
+		{
+			s_RendererAPI->SetDepthTest(flag);
+		}
 	private:
 		static Scope<RendererAPI> s_RendererAPI;
 	};

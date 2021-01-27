@@ -10,6 +10,9 @@
 
 #include "Entity.h"
 
+#include "Arc/Renderer/RenderCommand.h"
+#include "Arc/Renderer/Renderer.h"
+
 namespace ArcEngine
 {
 	Scene::Scene()
@@ -51,6 +54,7 @@ namespace ArcEngine
 		CopyComponent<Rigidbody2DComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<BoxCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<CircleCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<SkylightComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<NativeScriptComponent>(target->m_Registry, m_Registry, enttMap);
 	}
 
@@ -95,8 +99,29 @@ namespace ArcEngine
 
 	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
 	{
-		Renderer2D::BeginScene(camera);
+		// 3D==============================================================
+		Renderer::BeginScene(camera);
+		
+		Ref<TextureCube> textureCube;
+		{
+			auto view = m_Registry.view<SkylightComponent>();
+			for (auto entity : view)
+			{
+				auto skylight = view.get<SkylightComponent>(entity);
+				if (skylight.Texture)
+					textureCube = skylight.Texture;
+			}
+		}
+		if(textureCube)
+			Renderer::DrawSkybox(textureCube, camera);
 
+		Renderer::EndScene();
+		// ================================================================
+
+		
+		// 2D==============================================================
+		Renderer2D::BeginScene(camera);
+		
 		{
 			auto view = m_Registry.view<TransformComponent, SpriteRendererComponent>();
 			for (auto entity : view)
@@ -106,7 +131,7 @@ namespace ArcEngine
 				Renderer2D::DrawQuad((uint32_t)entity, transform.GetTransform(), sprite.Texture, sprite.Color, sprite.TilingFactor);
 			}
 		}
-
+		
 		// Debug Draw
 		{
 			const glm::vec4 debugColor(0.5686f, 0.9568f, 0.5450981f, 0.25f);
@@ -121,6 +146,7 @@ namespace ArcEngine
 		}
 
 		Renderer2D::EndScene();
+		// ================================================================
 	}
 
 	void Scene::OnRuntimeStart()
@@ -205,6 +231,27 @@ namespace ArcEngine
 
 		if(mainCamera)
 		{
+			// 3D==============================================================
+			Renderer::BeginScene(*mainCamera);
+			
+			Ref<TextureCube> textureCube;
+			{
+				auto view = m_Registry.view<SkylightComponent>();
+				for (auto entity : view)
+				{
+					auto skylight = view.get<SkylightComponent>(entity);
+					if (skylight.Texture)
+						textureCube = skylight.Texture;
+				}
+			}
+			if(textureCube)
+				Renderer::DrawSkybox(textureCube, *mainCamera);
+
+			Renderer::EndScene();
+			// ================================================================
+
+			
+			// 2D==============================================================
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
 			
 			{
@@ -240,6 +287,7 @@ namespace ArcEngine
 			}
 
 			Renderer2D::EndScene();
+			// ================================================================
 		}
 	}
 
@@ -328,6 +376,11 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<SkylightComponent>(Entity entity, SkylightComponent& component)
 	{
 	}
 }
