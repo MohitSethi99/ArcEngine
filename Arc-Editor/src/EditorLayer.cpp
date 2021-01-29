@@ -4,6 +4,8 @@
 #include <imgui/imgui.h>
 #include <ImGuizmo.h>
 
+
+#include "Arc/ImGui/Modules/ImGuiConsole.h"
 #include "Panels/SceneHierarchyPanel.h"
 
 #include "Arc/Scene/SceneSerializer.h"
@@ -11,7 +13,6 @@
 #include "Arc/Utils/PlatformUtils.h"
 
 #include "Arc/Math/Math.h"
-#include "Arc/Physics/Physics2D.h"
 
 namespace ArcEngine
 {
@@ -215,6 +216,7 @@ namespace ArcEngine
 		m_SceneHierarchyPanel.OnImGuiRender();
 		m_SettingsPanel.OnImGuiRender();
 		m_StatsPanel.OnImGuiRender();
+		ImGuiConsole::OnImGuiRender();
 
 		
 
