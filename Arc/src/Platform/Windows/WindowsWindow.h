@@ -22,6 +22,8 @@ namespace ArcEngine
 		inline void SetEventCallBack(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
+		void EnableCursor() override;
+		void DisableCursor() override;
 
 		inline virtual void* GetNativeWindow() const { return m_Window; }
 	private:

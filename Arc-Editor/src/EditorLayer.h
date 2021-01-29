@@ -25,6 +25,7 @@ namespace ArcEngine
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
 
 		void NewScene();
 		void OpenScene();
@@ -50,6 +51,7 @@ namespace ArcEngine
 		Entity m_HoveredEntity;
 
 		EditorCamera m_EditorCamera;
+		bool m_HasViewportEvent = false;
 
 		bool m_ViewportFocused = false;
 		bool m_ViewportHovered = false;
