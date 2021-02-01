@@ -24,9 +24,13 @@
 #include "Arc/Scene/SceneCamera.h"
 
 //-----Renderer-----------------------------------
+#include "Arc/Renderer/SceneRenderer.h"
 #include "Arc/Renderer/Renderer.h"
 #include "Arc/Renderer/Renderer2D.h"
 #include "Arc/Renderer/RenderCommand.h"
+
+#include "Arc/Renderer/Mesh.h"
+#include "Arc/Renderer/Material.h"
 
 #include "Arc/Renderer/Buffer.h"
 #include "Arc/Renderer/Shader.h"

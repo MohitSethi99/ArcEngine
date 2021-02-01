@@ -41,7 +41,8 @@ project "Arc"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.yaml_cpp}",
 		"%{IncludeDir.ImGuizmo}",
-		"%{IncludeDir.Box2D}"
+		"%{IncludeDir.Box2D}",
+		"%{IncludeDir.Assimp}"
 	}
 
 	links
@@ -51,6 +52,7 @@ project "Arc"
 		"ImGui",
 		"yaml-cpp",
 		"box2d",
+		"assimp",
 		"opengl32.lib"
 	}
 

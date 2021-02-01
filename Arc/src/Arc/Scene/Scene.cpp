@@ -10,13 +10,14 @@
 
 #include "Entity.h"
 
-#include "Arc/Renderer/RenderCommand.h"
 #include "Arc/Renderer/Renderer.h"
+#include "Arc/Renderer/SceneRenderer.h"
 
 namespace ArcEngine
 {
 	Scene::Scene()
 	{
+		SceneRenderer::Init();
 	}
 
 	Scene::~Scene()
@@ -54,7 +55,9 @@ namespace ArcEngine
 		CopyComponent<Rigidbody2DComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<BoxCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<CircleCollider2DComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<MeshComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<SkylightComponent>(target->m_Registry, m_Registry, enttMap);
+		CopyComponent<LightComponent>(target->m_Registry, m_Registry, enttMap);
 		CopyComponent<NativeScriptComponent>(target->m_Registry, m_Registry, enttMap);
 	}
 
@@ -116,6 +119,33 @@ namespace ArcEngine
 			Renderer::DrawSkybox(textureCube, camera);
 
 		Renderer::EndScene();
+
+		std::vector<Entity> lights;
+		auto view = m_Registry.view<IDComponent, TransformComponent, LightComponent>();
+		for (auto entity : view)
+		{
+			auto idComponent = view.get<IDComponent>(entity);
+			lights.push_back(Entity(m_EntityMap.at(idComponent.ID), this));
+		}
+		
+		SceneRenderer::BeginScene(camera, lights);
+
+		// Bind irradiance map before mesh drawing.
+		if(textureCube)
+			textureCube->Bind(1);
+		{
+			auto view = m_Registry.view<TransformComponent, MeshComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, mesh] = view.get<TransformComponent, MeshComponent>(entity);
+				if(mesh.mesh)
+				{
+					SceneRenderer::SubmitMesh(mesh.mesh, transform.GetTransform());
+				}
+			}
+		}
+		
+		SceneRenderer::EndScene();
 		// ================================================================
 
 		
@@ -214,6 +244,7 @@ namespace ArcEngine
 		// Render 2D
 		Camera* mainCamera = nullptr;
 		glm::mat4 cameraTransform;
+		glm::vec3 cameraPosition;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
 			for (auto entity : view)
@@ -224,6 +255,7 @@ namespace ArcEngine
 				{
 					mainCamera = &camera.Camera;
 					cameraTransform = transform.GetTransform();
+					cameraPosition = transform.Translation;
 					break;
 				}
 			}
@@ -232,7 +264,7 @@ namespace ArcEngine
 		if(mainCamera)
 		{
 			// 3D==============================================================
-			Renderer::BeginScene(*mainCamera);
+			Renderer::BeginScene(*mainCamera, cameraTransform);
 			
 			Ref<TextureCube> textureCube;
 			{
@@ -245,11 +277,38 @@ namespace ArcEngine
 				}
 			}
 			if(textureCube)
-				Renderer::DrawSkybox(textureCube, *mainCamera);
+				Renderer::DrawSkybox(textureCube, *mainCamera, cameraTransform);
 
 			Renderer::EndScene();
 			// ================================================================
 
+			std::vector<Entity> lights;
+			auto view = m_Registry.view<IDComponent, TransformComponent, LightComponent>();
+			for (auto entity : view)
+			{
+				auto idComponent = view.get<IDComponent>(entity);
+				lights.push_back(Entity(m_EntityMap.at(idComponent.ID), this));
+			}
+			
+			SceneRenderer::BeginScene(*mainCamera, cameraTransform, cameraPosition, lights);
+
+			// Bind irradiance map before mesh drawing.
+			if(textureCube)
+				textureCube->Bind(1);
+			{
+				auto view = m_Registry.view<TransformComponent, MeshComponent>();
+				for (auto entity : view)
+				{
+					auto [transform, mesh] = view.get<TransformComponent, MeshComponent>(entity);
+					if(mesh.mesh)
+					{
+						SceneRenderer::SubmitMesh(mesh.mesh, transform.GetTransform());
+					}
+				}
+			}
+			
+			SceneRenderer::EndScene();
+			// ================================================================
 			
 			// 2D==============================================================
 			Renderer2D::BeginScene(*mainCamera, cameraTransform);
@@ -381,6 +440,16 @@ namespace ArcEngine
 
 	template<>
 	void Scene::OnComponentAdded<SkylightComponent>(Entity entity, SkylightComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component)
 	{
 	}
 }

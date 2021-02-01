@@ -34,6 +34,7 @@ IncludeDir["entt"] = "%{wks.location}/Arc/vendor/entt/include"
 IncludeDir["yaml_cpp"] = "%{wks.location}/Arc/vendor/yaml-cpp/include"
 IncludeDir["ImGuizmo"] = "%{wks.location}/Arc/vendor/ImGuizmo"
 IncludeDir["Box2D"] = "%{wks.location}/Arc/vendor/box2d/include"
+IncludeDir["Assimp"] = "%{wks.location}/Arc/vendor/assimp/include"
 
 group "Dependencies"
 	include "vendor/premake"
@@ -42,6 +43,7 @@ group "Dependencies"
 	include "Arc/vendor/imgui"
 	include "Arc/vendor/yaml-cpp"
 	include "Arc/vendor/box2d"
+	include "Arc/vendor/assimp"
 
 group ""
 

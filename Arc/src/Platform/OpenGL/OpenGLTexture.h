@@ -16,6 +16,7 @@ namespace ArcEngine
 		virtual uint32_t GetWidth() const override { return m_Width; }
 		virtual uint32_t GetHeight() const override { return m_Height; }
 		virtual uint32_t GetRendererID() const override { return m_RendererID; }
+		virtual std::string GetName() const override { return m_Path; }
 
 		virtual void SetData(void* data, uint32_t size) override;
 
@@ -38,6 +39,7 @@ namespace ArcEngine
 		virtual uint32_t GetWidth() const override { return m_Width; }
 		virtual uint32_t GetHeight() const override { return m_Height; }
 		virtual uint32_t GetRendererID() const override { return m_RendererID; }
+		virtual std::string GetName() const override { return "TODO"; }
 
 		virtual void SetData(void* data, uint32_t size) override {}
 
@@ -46,10 +48,12 @@ namespace ArcEngine
 		virtual bool operator==(const Texture& other) const override { return m_RendererID == ((OpenGLTextureCube&)other).m_RendererID; }
 
 		virtual uint32_t GetHDRRendererID() override { return hdrRenderID; }
+		virtual uint32_t GetIrradianceRendererID() override { return m_IrradianceRendererID; }
 	private:
 		std::vector<std::string> m_PathList;
 		uint32_t m_Width, m_Height;
 		uint32_t m_RendererID = 0;
+		uint32_t m_IrradianceRendererID = 0;
 
 		uint32_t hdrRenderID = 0;
 	};

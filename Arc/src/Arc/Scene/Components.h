@@ -11,6 +11,7 @@
 #include "Arc/Physics/Rigidbody2D.h"
 #include "Arc/Physics/BoxCollider2D.h"
 #include "Arc/Physics/CircleCollider2D.h"
+#include "Arc/Renderer/Mesh.h"
 #include "Arc/Scene/SceneCamera.h"
 #include "Arc/Scene/ScriptableEntity.h"
 
@@ -75,6 +76,57 @@ namespace ArcEngine
 		{
 			Texture = nullptr;
 			TextureFilepath = "";
+		}
+	};
+
+	struct MeshComponent
+	{
+		Ref<Mesh> mesh;
+		operator Ref<Mesh>& () { return mesh; }
+		
+		enum class Geometry
+		{
+			Cube = 0,
+			Sphere,
+			Plane,
+			Quad,
+			Cone,
+			Cylinder
+		};
+
+		MeshComponent() = default;
+		MeshComponent(int entityID, const std::string& meshPath)
+		{
+			mesh = CreateRef<Mesh>(entityID, meshPath);
+		}
+		MeshComponent(int entityID, Geometry geometry)
+		{
+			switch (geometry)
+			{
+				case Geometry::Cube:
+					mesh = CreateRef<Mesh>(entityID, "assets/models/primitives/cube.fbx");
+					break;
+				case Geometry::Sphere:
+					mesh = CreateRef<Mesh>(entityID, "assets/models/primitives/sphere.fbx");
+					break;
+				case Geometry::Plane:
+					mesh = CreateRef<Mesh>(entityID, "assets/models/primitives/plane.fbx");
+					break;
+				case Geometry::Quad:
+					mesh = CreateRef<Mesh>(entityID, "assets/models/primitives/quad.fbx");
+					break;
+				case Geometry::Cone:
+					mesh = CreateRef<Mesh>(entityID, "assets/models/primitives/cone.fbx");
+					break;
+				case Geometry::Cylinder:
+					mesh = CreateRef<Mesh>(entityID, "assets/models/primitives/cylinder.fbx");
+					break;
+			}
+		}
+
+		void Set(int entityID, const std::string& filepath)
+		{
+			mesh = CreateRef<Mesh>(entityID, filepath);
 		}
 	};
 
@@ -210,6 +262,33 @@ namespace ArcEngine
 		{
 			Texture = nullptr;
 			TextureFilepath = "";
+		}
+	};
+
+	struct LightComponent
+	{
+		enum class LightType
+		{
+			Directional = 0,
+			Point,
+
+			// Not Implemented in shader yet!
+			Spot,
+			Area
+		};
+
+		LightType Type = LightType::Directional;
+		glm::vec3 Color = glm::vec3(1.0f);
+		float Intensity = 1.0f;
+
+		float Constant = 1.0f;
+		float Linear = 0.09f;
+		float Quadratic = 0.032f;
+
+		LightComponent() = default;
+		LightComponent(LightType type)
+			: Type(type)
+		{
 		}
 	};
 }

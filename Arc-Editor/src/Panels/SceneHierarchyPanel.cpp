@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-
 #include "Arc/Utils/PlatformUtils.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -43,16 +42,108 @@ namespace ArcEngine
 			{
 				m_SelectionContext = m_Context->CreateEntity("Empty Entity");
 			}
-			else if (ImGui::MenuItem("Create Camera"))
+
+			if (ImGui::MenuItem("Camera"))
 			{
 				m_SelectionContext = m_Context->CreateEntity("Camera");
 				m_SelectionContext.AddComponent<CameraComponent>();
 				ImGui::CloseCurrentPopup();
 			}
-			else if (ImGui::MenuItem("Create Sprite"))
+
+			if (ImGui::MenuItem("Sprite"))
 			{
 				m_SelectionContext = m_Context->CreateEntity("Sprite");
 				m_SelectionContext.AddComponent<SpriteRendererComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::BeginMenu("3D Object"))
+			{
+				if (ImGui::MenuItem("Mesh"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Mesh");
+					m_SelectionContext.AddComponent<MeshComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				
+				if (ImGui::MenuItem("Cube"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Cube");
+					m_SelectionContext.AddComponent<MeshComponent>(m_SelectionContext.GetComponent<IDComponent>().ID, MeshComponent::Geometry::Cube);
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Sphere"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Sphere");
+					m_SelectionContext.AddComponent<MeshComponent>(m_SelectionContext.GetComponent<IDComponent>().ID, MeshComponent::Geometry::Sphere);
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Plane"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Plane");
+					m_SelectionContext.AddComponent<MeshComponent>(m_SelectionContext.GetComponent<IDComponent>().ID, MeshComponent::Geometry::Plane);
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Quad"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Quad");
+					m_SelectionContext.AddComponent<MeshComponent>(m_SelectionContext.GetComponent<IDComponent>().ID, MeshComponent::Geometry::Quad);
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Cone"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Cone");
+					m_SelectionContext.AddComponent<MeshComponent>(m_SelectionContext.GetComponent<IDComponent>().ID, MeshComponent::Geometry::Cone);
+					ImGui::CloseCurrentPopup();
+				}
+
+				if (ImGui::MenuItem("Cylinder"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Cylinder");
+					m_SelectionContext.AddComponent<MeshComponent>(m_SelectionContext.GetComponent<IDComponent>().ID, MeshComponent::Geometry::Cylinder);
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Light"))
+			{
+				if (ImGui::MenuItem("Directional"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Directional Light");
+					m_SelectionContext.AddComponent<LightComponent>(LightComponent::LightType::Directional);
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Point"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Point Light");
+					m_SelectionContext.AddComponent<LightComponent>(LightComponent::LightType::Point);
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Spot"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Spot Light");
+					m_SelectionContext.AddComponent<LightComponent>(LightComponent::LightType::Spot);
+					ImGui::CloseCurrentPopup();
+				}
+				else if (ImGui::MenuItem("Area"))
+				{
+					m_SelectionContext = m_Context->CreateEntity("Area Light");
+					m_SelectionContext.AddComponent<LightComponent>(LightComponent::LightType::Area);
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::MenuItem("Skylight"))
+			{
+				m_SelectionContext = m_Context->CreateEntity("Skylight");
+				m_SelectionContext.AddComponent<SkylightComponent>();
 				ImGui::CloseCurrentPopup();
 			}
 			
@@ -321,13 +412,115 @@ namespace ArcEngine
 			}
 			if(open)
 			{
-				uiFunction(component);
+				uiFunction(entity, component);
 				ImGui::TreePop();
 			}
 
 			if(removeComponent)
 				entity.RemoveComponent<T>();
 		}
+	}
+
+	static void DrawPBRProperties(Ref<PbrMaterial>& materialInstance)
+	{
+		const char* filesFlag = "png\0*.png\0jpg\0*.jpg\0bmp\0*.bmp\0";
+		int id = 0;
+		//==============================================
+		// Albedo
+		ImGui::PushID(id);
+		ImGui::Checkbox("", &materialInstance->UseAlbedoMap); ImGui::SameLine();
+		id++;
+		ImGui::PopID();
+		if (ImGui::ImageButton((ImTextureID)materialInstance->AlbedoMap->GetRendererID(), ImVec2(16, 16), ImVec2(0,1), ImVec2(1,0), -1, ImVec4(0,0,0,0), ImVec4(0.9, 0.9f, 0.9f, 1.0f)))
+		{
+			std::string path = FileDialogs::OpenFile(filesFlag);
+			if (!path.empty())
+				materialInstance->AlbedoMap = Texture2D::Create(path);
+		}
+		ImGui::SameLine(); ImGui::ColorEdit4("Albedo", (float*)&materialInstance->Color);
+		//==============================================
+
+		//==============================================
+		// Normals
+		ImGui::PushID(id);
+		ImGui::Checkbox("", &materialInstance->UseNormalMap); ImGui::SameLine();
+		id++;
+		ImGui::PopID();
+		if (ImGui::ImageButton((ImTextureID)materialInstance->NormalMap->GetRendererID(), ImVec2(16, 16), ImVec2(0,1), ImVec2(1,0), -1, ImVec4(0,0,0,0), ImVec4(0.9, 0.9f, 0.9f, 1.0f)))
+		{
+			std::string path = FileDialogs::OpenFile(filesFlag);
+			if (!path.empty())
+				materialInstance->NormalMap = Texture2D::Create(path);
+		}
+		ImGui::SameLine();
+		ImGui::Text("Normals");
+		//==============================================
+
+		//==============================================
+		// Metallic
+		ImGui::PushID(id);
+		ImGui::Checkbox("", &materialInstance->UseMetallicMap); ImGui::SameLine();
+		id++;
+		ImGui::PopID();
+		if (ImGui::ImageButton((ImTextureID)materialInstance->MetallicMap->GetRendererID(), ImVec2(16, 16), ImVec2(0,1), ImVec2(1,0), -1, ImVec4(0,0,0,0), ImVec4(0.9, 0.9f, 0.9f, 1.0f)))
+		{
+			std::string path = FileDialogs::OpenFile(filesFlag);
+			if (!path.empty())
+				materialInstance->MetallicMap = Texture2D::Create(path);
+		}
+		ImGui::SameLine();
+		ImGui::SliderFloat("Metallic", &materialInstance->Metallic, 0.0f, 1.0f);
+		//==============================================
+
+		//==============================================
+		// Roughness
+		ImGui::PushID(id);
+		ImGui::Checkbox("", &materialInstance->UseRoughnessMap); ImGui::SameLine();
+		id++;
+		ImGui::PopID();
+		if (ImGui::ImageButton((ImTextureID)materialInstance->RoughnessMap->GetRendererID(), ImVec2(16, 16), ImVec2(0,1), ImVec2(1,0), -1, ImVec4(0,0,0,0), ImVec4(0.9, 0.9f, 0.9f, 1.0f)))
+		{
+			std::string path = FileDialogs::OpenFile(filesFlag);
+			if (!path.empty())
+				materialInstance->RoughnessMap = Texture2D::Create(path);
+		}
+		ImGui::SameLine();
+		ImGui::SliderFloat("Roughness", &materialInstance->Roughness, 0.01f, 1.0f);
+		//==============================================
+
+		//==============================================
+		// Occlusion
+		ImGui::PushID(id);
+		ImGui::Checkbox("", &materialInstance->UseOcclusionMap); ImGui::SameLine();
+		id++;
+		ImGui::PopID();
+		if (ImGui::ImageButton((ImTextureID)materialInstance->AmbientOcclusionMap->GetRendererID(), ImVec2(16, 16), ImVec2(0,1), ImVec2(1,0), -1, ImVec4(0,0,0,0), ImVec4(0.9, 0.9f, 0.9f, 1.0f)))
+		{
+			std::string path = FileDialogs::OpenFile(filesFlag);
+			if (!path.empty())
+				materialInstance->AmbientOcclusionMap = Texture2D::Create(path);
+		}
+		ImGui::SameLine();
+		ImGui::SliderFloat("Occlusion", &materialInstance->AO, 0.0f, 1.0f);
+		//==============================================
+
+
+		//==============================================
+		// Emmission
+		ImGui::PushID(id);
+		ImGui::Checkbox("", &materialInstance->UseEmissiveMap); ImGui::SameLine();
+		id++;
+		ImGui::PopID();
+		if (ImGui::ImageButton((ImTextureID)materialInstance->EmissiveMap->GetRendererID(), ImVec2(16, 16), ImVec2(0,1), ImVec2(1,0), -1, ImVec4(0,0,0,0), ImVec4(0.9, 0.9f, 0.9f, 1.0f)))
+		{
+			std::string path = FileDialogs::OpenFile(filesFlag);
+			if (!path.empty())
+				materialInstance->EmissiveMap = Texture2D::Create(path);
+		}
+		ImGui::SameLine();
+		ImGui::ColorEdit3("Color", (float*)&materialInstance->EmissiveColor);
+		ImGui::SliderFloat("Intensity", &materialInstance->EmissiveIntensity, 0.0f, 10.0f);
+		//==============================================
 	}
 	
 	void SceneHierarchyPanel::DrawComponents(Entity entity)
@@ -405,12 +598,30 @@ namespace ArcEngine
 				ImGui::CloseCurrentPopup();
 			}
 			
+			if (ImGui::MenuItem("Light"))
+			{
+				if (!entity.HasComponent<LightComponent>())
+					entity.AddComponent<LightComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Light Component!");
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (ImGui::MenuItem("Mesh"))
+			{
+				if (!entity.HasComponent<MeshComponent>())
+					entity.AddComponent<MeshComponent>();
+				else
+					ARC_CORE_WARN("This entity already has the Mesh Component!");
+				ImGui::CloseCurrentPopup();
+			}
+			
 			ImGui::EndPopup();
 		}
 
 		ImGui::PopItemWidth();
 		
-		DrawComponent<TransformComponent>("Transform", entity, [](TransformComponent& component)
+		DrawComponent<TransformComponent>("Transform", entity, [](Entity& e, TransformComponent& component)
 		{
 			DrawVec3Control("Translation", component.Translation);
 			
@@ -421,7 +632,7 @@ namespace ArcEngine
 			DrawVec3Control("Scale", component.Scale, 1.0f);
 		}, false);
 
-		DrawComponent<CameraComponent>("Camera", entity, [](CameraComponent& component)
+		DrawComponent<CameraComponent>("Camera", entity, [](Entity& e, CameraComponent& component)
 		{
 			auto& camera = component.Camera;
 
@@ -480,7 +691,7 @@ namespace ArcEngine
 			}
 		});
 		
-		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](SpriteRendererComponent& component)
+		DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](Entity& e, SpriteRendererComponent& component)
 		{
 			SetLabel("Color");
 			ImGui::ColorEdit4("##Color", glm::value_ptr(component.Color));
@@ -515,7 +726,7 @@ namespace ArcEngine
 			DrawFloatControl("Tiling Factor", &component.TilingFactor, 0, 0);
 		});
 
-		DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", entity, [](Rigidbody2DComponent& component)
+		DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", entity, [](Entity& e, Rigidbody2DComponent& component)
 		{
 			{
 				const char* items[] = { "Static", "Kinematic", "Dynamic" };
@@ -627,7 +838,7 @@ namespace ArcEngine
 			component.ValidateSpecification();
 		});
 
-		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](BoxCollider2DComponent& component)
+		DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](Entity& e, BoxCollider2DComponent& component)
 		{
 			DrawCheckbox("IsTrigger", &component.IsTrigger);
 
@@ -658,7 +869,7 @@ namespace ArcEngine
 			component.ValidateSpecification();
 		});
 
-		DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](CircleCollider2DComponent& component)
+		DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](Entity& e, CircleCollider2DComponent& component)
 		{
 			DrawCheckbox("IsTrigger", &component.IsTrigger);
 
@@ -671,7 +882,7 @@ namespace ArcEngine
 			component.ValidateSpecification();
 		});
 
-		DrawComponent<SkylightComponent>("Skylight Component", entity, [](SkylightComponent& component)
+		DrawComponent<SkylightComponent>("Skylight Component", entity, [](Entity& e, SkylightComponent& component)
 		{
 			const uint32_t id = component.Texture != nullptr ? component.Texture->GetHDRRendererID() : 0;
 			
@@ -697,6 +908,85 @@ namespace ArcEngine
 				component.RemoveTexture();
 			ImGui::PopStyleColor(3);
 			ImGui::PopStyleVar();
+		});
+
+		DrawComponent<LightComponent>("Light Component", entity, [](Entity& e, LightComponent& component)
+		{
+			{
+				const char* items[] = { "Directional", "Point", "Spot", "Area" };
+				const char* current_item = items[(int)component.Type];
+				SetLabel("Type");
+				if (ImGui::BeginCombo("##Type", current_item))
+				{
+					for (int n = 0; n < 4; n++)
+					{
+						bool is_selected = (current_item == items[n]);
+						if (ImGui::Selectable(items[n], is_selected))
+						{
+							current_item = items[n];
+							component.Type = (LightComponent::LightType)n;
+						}
+
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+			}
+			
+			SetLabel("Light Color");
+			ImGui::ColorEdit3("##LightColor", glm::value_ptr(component.Color));
+
+			SetLabel("Intensity");
+			ImGui::DragFloat("##Intensity", &component.Intensity);
+		});
+		
+		DrawComponent<MeshComponent>("Mesh Component", entity, [](Entity& e, MeshComponent& component)
+		{
+			ImGui::Text("Mesh");
+
+			if(component.mesh)
+				ImGui::Text(component.mesh->GetFilePath().c_str());
+			else
+				ImGui::Text("Empty");
+
+			ImGui::SameLine(0.0f, ImGui::GetContentRegionAvail().x - 75);
+			if (ImGui::Button("...", { 30, 20 }))
+			{
+				std::string filepath = FileDialogs::OpenFile("3D Model (*.obj)\0*.obj\0 (*.fbx)\0*.fbx\0");
+				if (!filepath.empty())
+					component.Set(e.GetComponent<IDComponent>().ID, filepath);
+			}
+
+			if(component.mesh)
+			{
+				Ref<Mesh> mesh = component.mesh;
+				
+				ImGui::Text(mesh->GetName().c_str());
+
+				ImGui::Separator();
+
+				if (ImGui::TreeNode("Material List"))
+				{
+					for (int i = 0; i < mesh->GetMaterialsCount(); i++)
+					{
+						ImGui::PushID(i);
+						auto& material = mesh->GetMaterialInstance(i);
+
+						if (ImGui::TreeNode(material->Name.c_str()))
+						{
+							Ref<PbrMaterial> pbr = std::dynamic_pointer_cast<PbrMaterial>(material);
+							DrawPBRProperties(pbr);
+
+							ImGui::TreePop();
+						}
+						ImGui::Separator();
+
+						ImGui::PopID();
+					}
+					ImGui::TreePop();
+				}
+			}
 		});
 	}
 }

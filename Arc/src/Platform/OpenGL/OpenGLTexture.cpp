@@ -176,6 +176,7 @@ namespace ArcEngine
 	OpenGLTextureCube::OpenGLTextureCube(const std::string& path)
 	{
 		uint32_t cubemapSize = 2048;
+		uint32_t irradianceMapSize = 32;
 		
 		// Setup framebuffer
 		unsigned int captureFBO;
@@ -250,23 +251,64 @@ namespace ArcEngine
 			RenderCube();
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-		glDeleteFramebuffers(1, &captureFBO);
-		glDeleteRenderbuffers(1, &captureRBO);
+
+
+		// create an irradiance cubemap, and re-scale capture FBO to irradiance scale.
+		glGenTextures(1, &m_IrradianceRendererID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_IrradianceRendererID);
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, irradianceMapSize, irradianceMapSize, 0, GL_RGB, GL_FLOAT, nullptr);
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, irradianceMapSize, irradianceMapSize);
+
+		// solve diffuse integral by convolution to create an irradiance (cube)map.
+		Ref<Shader> irradianceShader = Shader::Create("assets/shaders/Irradiance.glsl");
+		irradianceShader->Bind();
+		irradianceShader->SetInt("u_EnvironmentMap", 0);
+		irradianceShader->SetMat4("u_Projection", captureProjection);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+
+		glViewport(0, 0, irradianceMapSize, irradianceMapSize); // don't forget to configure the viewport to the capture dimensions.
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			irradianceShader->SetMat4("u_View", captureViews[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_IrradianceRendererID, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			RenderCube();
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 	
 	OpenGLTextureCube::~OpenGLTextureCube()
 	{
 		ARC_PROFILE_FUNCTION();
 
+		glDeleteTextures(1, &hdrRenderID);
+		glDeleteTextures(1, &m_IrradianceRendererID);
 		glDeleteTextures(1, &m_RendererID);
 	}
 
+	// 0 => Cubemap, 1 = IrradianceMap
 	void OpenGLTextureCube::Bind(uint32_t slot) const
 	{
 		ARC_PROFILE_FUNCTION();
-		
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+
+		if(slot == 0)
+			glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+		else
+			glBindTexture(GL_TEXTURE_CUBE_MAP, m_IrradianceRendererID);
 	}
 }
