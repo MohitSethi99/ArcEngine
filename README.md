@@ -48,7 +48,7 @@ Right now, Arc Game Engine is very bare-bones. Its most remarkable features are:
 
 | Feature | Description | Status |
 | ------- | ----------- | ------ |
-| **Shadow Support** | Basic scripting in C# using mono. | WIP 💻 |
+| **Scripting Support** | Basic scripting in C# using mono. | WIP 💻 |
 | **Shadow Support** | Soft and Hard shadow support in OpenGL 3D Renderer. | WIP 💻 |
 | **Asset manager** | Basic asset handling API. | WIP 💻 |
 | **3D Physics system** | Nvidia's Physx engine support for 3D physics. | TODO 📋 |
